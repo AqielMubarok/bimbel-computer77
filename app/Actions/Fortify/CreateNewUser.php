@@ -28,7 +28,6 @@ class CreateNewUser implements CreatesNewUsers
             abort(403, 'Pengguna sudah melebihi batas kuota');
         }
 
-        // Validasi input termasuk nomor handphone
         Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
             'email' => [
@@ -37,18 +36,25 @@ class CreateNewUser implements CreatesNewUsers
                 'email',
                 'max:255',
                 Rule::unique(User::class),
-            ],
+                function ($attribute, $value, $fail) {
+                    // Menambahkan validasi custom untuk domain email
+                    if (!preg_match('/@(gmail\.com|yahoo\.com|hotmail\.com)$/', $value)) {
+                        $fail('Email harus menggunakan domain gmail.com, yahoo.com, atau hotmail.com.');
+                    }
+                },
+            ],  
             'phone' => [
                 'required',
                 'string',
                 'max:15',
-                'regex:/^\+?[0-9]{10,15}$/', // Format nomor telepon
+                'regex:/^(\+62|62|0)8[1-9][0-9]{6,9}$/', // Format nomor telepon
                 Rule::unique(User::class),
             ],
 
             'password' => $this->passwordRules(),
         ], [
-            'phone.required' => 'Nomor handphone diperlukan.',
+            'email.unique' => 'Alamat email ini sudah digunakan',
+            'phone.required' => 'Nomor Handphone belum diisi.',
             'phone.regex' => 'Nomor handphone tidak valid.',
             'phone.unique' => 'Nomor handphone sudah terdaftar.',
             'password.required' => 'Password diperlukan.',

@@ -27,15 +27,10 @@
                         <div class="card profile-widget">
                             <!-- Profile Picture -->
                             <div class="profile-widget-header text-center">
-                                @if(auth()->user()->rul == 'ADMIN')
+
+                                @if(auth()->user()->rul == 'PEMATERI' || auth()->user()->rul == 'ADMIN')
                                     <img alt="image" 
                                     src="{{ asset('img/avatar/school.jpg') }}" 
-                                    class="rounded-circle profile-widget-picture mb-4">
-                                @endif
-
-                                @if(auth()->user()->rul == 'PEMATERI')
-                                    <img alt="image" 
-                                    src="{{ asset('img/avatar/avatar-1.png') }}" 
                                     class="rounded-circle profile-widget-picture mb-4">
                                 @endif
 

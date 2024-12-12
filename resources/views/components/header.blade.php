@@ -164,14 +164,16 @@
         <li class="dropdown"><a href="#"
                 data-toggle="dropdown"
                 class="nav-link dropdown-toggle nav-link-lg nav-link-user">
+                @if(auth()->user()->rul == 'ADMIN' || auth()->user()->rul == 'PEMATERI')
                 <img alt="image"
                     src="{{ asset('img/avatar/school.jpg') }}"
                     class="rounded-circle mr-1">
-                    @if(auth()->user()->rul == 'PESERTA')
+                @endif
+                @if(auth()->user()->rul == 'PESERTA')
                 <img alt="image"
                     src="{{ asset('img/avatar/avatar-1.png') }}"
                     class="rounded-circle mr-1">
-                    @endif
+                @endif
                 <div class="d-sm-none d-lg-inline-block">Hi, {{ auth()->user()->name }}</div>
             </a>
             <div class="dropdown-menu dropdown-menu-right">

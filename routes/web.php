@@ -18,19 +18,17 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Controllers\DashboardAdminController;
 use App\Http\Controllers\LihatNilaiController;
 use App\Http\Controllers\HistoryController;
+use App\Http\Controllers\LoginController;
 
-
-
-
-
-Route::get('/login', function () {
-    return view('pages.auth.auth-login');
-})->name('login');
 
 
 Route::get('/', function () {
     return view('pages.app.LandingPage.landing');
 });
+
+Route::get('/login', [LoginController::class, 'index'])->name('login');
+Route::post('/login', [LoginController::class, 'login']);
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::middleware(['auth'])->group(function () {
 
@@ -151,7 +149,7 @@ Route::middleware(['auth', 'Admin'])->group(function () {
     Route::get('/nilai/{id}/download', [NilaiController::class, 'download'])->name('nilai.download');
 
     Route::get('/pembayaran/history', [HistoryController::class, 'history'])->name('history.pembayaran');
-   
+
     
 
   

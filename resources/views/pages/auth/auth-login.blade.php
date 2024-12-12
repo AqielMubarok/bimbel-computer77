@@ -23,7 +23,7 @@
                         class="form-control @error('email') is-invalid @enderror" 
                         name="email" tabindex="1" autofocus required>
                     <div class="invalid-feedback">
-                        
+                    Masukkan Email    
                     </div>
                     @error('email')
                         <div class="invalid-feedback">
@@ -32,7 +32,7 @@
                     @enderror
                 </div>
 
-                <!-- Input Password -->
+                <!-- Password input -->
                 <div class="form-group">
                     <div class="d-block">
                         <label for="password" class="control-label">Password</label>
@@ -50,11 +50,12 @@
                             </button>
                         </div>
                         <div class="invalid-feedback">
-                           
+                        Masukkan Password.
                         </div>
                     </div>
+                    
                     @error('password')
-                        <div class="invalid-feedback">
+                        <div class="invalid-feedback d-block">
                             {{ $message }}
                         </div>
                     @enderror
@@ -68,7 +69,7 @@
                         class="form-control @error('captcha') is-invalid @enderror"
                         placeholder="Enter Captcha" required>
                     <div class="invalid-feedback">
-                       
+                    Masukkan Captcha.   
                     </div>
                     @error('captcha')
                         <div class="invalid-feedback">

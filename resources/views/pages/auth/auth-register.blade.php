@@ -24,7 +24,7 @@
                             class="form-control @error('name') is-invalid @enderror"
                             name="name" autofocus required>
                         <div class="invalid-feedback">
-                        Please fill in your name.
+                        Masukkan Nama Anda
                         </div>
                         @error('name')
                             <div class="invalid-feedback">
@@ -35,31 +35,54 @@
                 </div>
 
                 <div class="form-group">
-                        <label for="phone">Nomor Handphone</label>
-                        <input id="phone" type="number"
-                            class="form-control @error('phone') is-invalid @enderror"
-                            name="phone" autofocus required>
+                    <label for="phone">Nomor Handphone</label>
+                    <input id="phone" type="tel"
+                        class="form-control @error('phone') is-invalid @enderror"
+                        name="phone" required
+                        title="Nomor handphone harus dimulai dengan +62, 62, atau 0 dan diikuti oleh angka 8"
+                        value="{{ old('phone') }}">
+                    
+                    <!-- Pesan error client-side -->
+                    <div id="phone-error" class="invalid-feedback"></div>
+
+                    <!-- Pesan error server-side -->
+                    @error('phone')
                         <div class="invalid-feedback">
-                        Please fill in your phone.
-                        </div>
-                        @error('phone')
-                            <div class="invalid-feedback">
+                            @if (str_contains($message, 'Nomor handphone sudah terdaftar'))
                                 {{ $message }}
-                            </div>
-                        @enderror
+                            @elseif (str_contains($message, 'Nomor handphone harus dimulai'))
+                                {{ $message }}
+                            @else
+                                {{ $message }}
+                            @endif
+                        </div>
+                    @enderror
                 </div>
+
 
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input id="email" type="email"
                         class="form-control @error('email') is-invalid @enderror"
-                        name="email" required>
-                    <div class="invalid-feedback">
-                    Please fill in your email.
-                    </div>
+                        name="email" required
+                        title="Masukkan email yang valid dengan domain gmail.com, yahoo.com, atau hotmail.com"
+                        value="{{ old('email') }}">
+                    
+                    <!-- Pesan error client-side -->
+                    <div id="email-error" class="invalid-feedback"></div>
+
+                    <!-- Pesan error server-side -->
                     @error('email')
                         <div class="invalid-feedback">
-                            {{ $message }}
+                            @if (str_contains($message, 'domain gmail.com, yahoo.com, atau hotmail.com'))
+                                {{ $message }}
+                            @elseif (str_contains($message, 'already been taken'))
+                                Email sudah terdaftar. Silakan gunakan email lain.
+                            @elseif (str_contains($message, 'must be a valid email address'))
+                                Format email tidak valid. Periksa kembali.
+                            @else
+                                {{ $message }}
+                            @endif
                         </div>
                     @enderror
                 </div>
@@ -76,7 +99,7 @@
                             </button>
                         </div>
                         <div class="invalid-feedback">
-                            Please fill in your password.
+                            Masukkan Password
                         </div>
                     </div>
                     @error('password')
@@ -98,7 +121,7 @@
                             </button>
                         </div>
                         <div class="invalid-feedback">
-                            Please confirm your password.
+                            Masukkan Konfirmasi Password
                         </div>
                     </div>
                     @error('password_confirmation')
@@ -108,17 +131,15 @@
                     @enderror
                 </div>
 
-
+                <!-- Input Captcha -->
                 <div class="form-group mt-2 mb-2">
-                    <label for="captcha">Captcha</label>
-                    <div class="mb-2">
-                        <img src="{{ captcha_src('mini') }}" alt="captcha">
-                    </div>
+                    <img src="{{ captcha_src('mini') }}" alt="captcha">
+                    <br><br>
                     <input type="text" name="captcha"
                         class="form-control @error('captcha') is-invalid @enderror"
                         placeholder="Enter Captcha" required>
                     <div class="invalid-feedback">
-                        Please fill in the captcha.
+                    Masukkan Captcha.   
                     </div>
                     @error('captcha')
                         <div class="invalid-feedback">
@@ -139,6 +160,61 @@
 
 @push('scripts')
     <script>
+
+        document.getElementById('email').addEventListener('blur', function () {
+            const email = this.value.trim();
+            const errorElement = document.getElementById('email-error');
+
+            // Cek apakah field kosong
+            if (!email) {
+                errorElement.textContent = 'Email belum diisi.';
+                this.classList.add('is-invalid');
+            } else {
+                errorElement.textContent = ''; // Hapus pesan error jika sudah diisi
+                this.classList.remove('is-invalid');
+            }
+        });
+
+        // Validasi sebelum form dikirim
+        document.querySelector('form').addEventListener('submit', function (e) {
+            const emailInput = document.getElementById('email');
+            const email = emailInput.value.trim();
+            const errorElement = document.getElementById('email-error');
+
+            if (!email) {
+                e.preventDefault(); // Mencegah pengiriman form
+                errorElement.textContent = 'Email belum diisi.';
+                emailInput.classList.add('is-invalid');
+            }
+        });
+
+        document.getElementById('phone').addEventListener('blur', function () {
+            const phone = this.value.trim();
+            const errorElement = document.getElementById('phone-error');
+
+            // Cek apakah field kosong
+            if (!phone) {
+                errorElement.textContent = 'Nomor handphone belum diisi.';
+                this.classList.add('is-invalid');
+            } else {
+                errorElement.textContent = ''; // Hapus pesan error jika sudah diisi
+                this.classList.remove('is-invalid');
+            }
+        });
+
+        // Validasi sebelum form dikirim
+        document.querySelector('form').addEventListener('submit', function (e) {
+            const phoneInput = document.getElementById('phone');
+            const phone = phoneInput.value.trim();
+            const errorElement = document.getElementById('phone-error');
+
+            if (!phone) {
+                e.preventDefault(); // Mencegah pengiriman form
+                errorElement.textContent = 'Nomor handphone belum diisi.';
+                phoneInput.classList.add('is-invalid');
+            }
+        });
+
         // Toggle Password Visibility
         document.querySelectorAll('.toggle-password').forEach(button => {
             button.addEventListener('click', function () {
