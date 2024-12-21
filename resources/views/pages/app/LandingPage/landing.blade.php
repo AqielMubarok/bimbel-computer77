@@ -417,7 +417,7 @@ nav a:hover {
         <div class="hero-content">
             <h1>Belajar Komputer Jadi Lebih Mudah</h1>
             <p>Tingkatkan kemampuan komputermu bersama pemateri berpengalaman melalui pembelajaran online yang interaktif</p>
-            <a href="{{route('login')}}" class="cta-button">Mulai Belajar Sekarang</a>
+            <a href="{{ route('login') }}" class="cta-button">Mulai Belajar Sekarang</a>
         </div>
     </section>
 

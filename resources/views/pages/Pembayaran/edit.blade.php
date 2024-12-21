@@ -1,6 +1,10 @@
 
 @extends('layouts.app')
 
+@php
+    use Illuminate\Support\Facades\Crypt;
+@endphp
+
 @section('title', 'Form Pembayaran')
 
 @section('main')
@@ -20,7 +24,7 @@
                         @endif
 <div class="container">
     <h2>Edit Status Pembayaran</h2>
-    <form action="{{ route('pembayaran.update', $pembayaran->id) }}" method="POST">
+    <form action="{{ route('pembayaran.update', Crypt::encrypt($pembayaran->id)) }}" method="POST">
         @csrf
         @method('PUT')
 

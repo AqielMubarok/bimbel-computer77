@@ -35,10 +35,11 @@
                             <div class="card-header">
                                 <h4>Data Nilai Peserta</h4>
                             </div>
-
+                            
                             <div class="card-body">
+                                @if(auth()->user()->rul == 'ADMIN' || auth()->user()->rul == 'PEMATERI')
                                 <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <form method="GET" action="{{ route('nilai.index') }}">
+                                    <form method="GET" action="{{ route('lihatnilai.index') }}">
                                         <div class="input-group">
                                             <input type="text" class="form-control" placeholder="Search" name="name" value="{{ request('name') }}">
                                             <div class="input-group-append">
@@ -47,16 +48,17 @@
                                         </div>
                                     </form>
                                 </div>
+                                @endif
 
                                 <div class="table-responsive">
                                     <table class="table table-striped">
                                         <thead>
                                             <tr>
                                                 <th>Name</th>
-                                                <th>Kehadiran</th>
-                                                <th>Kompetensi</th>
-                                                <th>Skill</th>
-                                                <th>Status</th>
+                                                <th>Nilai Tugas</th>
+                                                <th>Nilai Ujian</th>
+                                                <th>Predikat</th>
+                                                <th>Kompetensi Unggulan</th>
                                                 <th>Sertifikat</th> <!-- Tambahkan baris ini -->
                                                 @if(auth()->user()->rul == 'ADMIN' || auth()->user()->rul == 'PEMATERI')
                                                 <th>Action</th>
@@ -64,28 +66,23 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @forelse ($nilais as $user)
+                                            @forelse ($nilais as $nilai)
                                                 <tr>
-                                                    <td>{{ $user->name }}</td> <!-- Nama dari tabel users -->
-                                                    <td>{{ $user->kehadiran ?? 'Belum Diisi' }}</td> <!-- Kehadiran dari tabel nilais -->
-                                                    <td>{{ $user->kompetensi ?? 'Belum Diisi' }}</td> <!-- Kompetensi -->
-                                                    <td>{{ $user->skill ?? 'Belum Diisi' }}</td> <!-- Skill -->
-                                                    <td>{{ $user->status ?? 'Belum Diisi' }}</td> <!-- Status -->
-                                                    <td>
-                                                        @if(!empty($user->file_nilai))
-                                                            <a href="{{ asset('storage/' . $user->file_nilai) }}" class="btn btn-sm btn-primary btn-icon" download>
-                                                                <i class="fas fa-download"></i> File Sertifikat
-                                                            </a>
-                                                        @else
-                                                            <span class="text-danger">Belum Ada</span>
-                                                        @endif
-                                                    </td>
-                                                    <td>
+                                                <td>{{ $nilai->name }}</td> <!-- Nama pengguna dari join tabel users -->
+                                                <td>{{ $nilai->nilai_tugas ?? 'Belum Diisi' }}</td>
+                                                <td>{{ $nilai->nilai_ujian ?? 'Belum Diisi' }}</td>
+                                                <td>{{ $nilai->predikat ?? 'Belum Diisi' }}</td>
+                                                <td>{{ $nilai->kompetensi_unggulan ?? 'Belum Diisi' }}</td>
+                                                <td>
+                                                    <a href="{{ route('nilai.downloadCertificate', $nilai->id) }}" class="btn btn-sm btn-primary btn-icon">
+                                                        <i class="fas fa-download"></i> Download
+                                                    </a>
+                                                <td>
                                                     @if(auth()->user()->rul == 'ADMIN' || auth()->user()->rul == 'PEMATERI')
-                                                        <a href="{{ route('nilai.edit', $user->id) }}" class="btn btn-sm btn-info btn-icon mr-2">
+                                                        <a href="{{ route('nilai.edit', $nilai->id) }}" class="btn btn-sm btn-info btn-icon mr-2">
                                                             <i class="fas fa-edit"></i> Edit
                                                         </a>
-                                                        <form action="{{ route('nilai.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Are you sure?')" class="d-inline">
+                                                        <form action="{{ route('nilai.destroy', $nilai->id) }}" method="POST" onsubmit="return confirm('Are you sure?')" class="d-inline">
                                                             @csrf
                                                             @method('DELETE')
                                                             <button class="btn btn-sm btn-danger btn-icon">
@@ -97,7 +94,7 @@
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="6" class="text-center">Tidak ada data untuk ditampilkan</td>
+                                                    <td colspan="7" class="text-center">Tidak ada data untuk ditampilkan</td>
                                                 </tr>
                                             @endforelse
                                         </tbody>

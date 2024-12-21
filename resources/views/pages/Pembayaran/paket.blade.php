@@ -54,12 +54,11 @@
                             <div class="pricing-cta">
                                 <!-- Form untuk melakukan pembayaran -->
                                 <form action="{{ route('form.bayar') }}" method="GET">
-                                    <input type="hidden" name="paket" value="Premium">
-                                    <!-- Input harga format mata uang (readonly) -->
-                                    
-                                    <!-- Input tersembunyi untuk mengirimkan harga murni -->
-                                    <input type="hidden" name="harga"  value="1200000">
-                                    <button type="submit" class="btn btn-primary">Pesan <i class="fas fa-shopping-cart"></i></button>
+                                    @php
+                                        $data = encrypt(json_encode(['paket' => 'Premium', 'harga' => 1200000]));
+                                    @endphp
+                                    <input type="hidden" name="data" value="{{ $data }}">
+                                    <button type="submit" class="btn btn-primary-pesan">Pesan <i class="fas fa-shopping-cart"></i></button>
                                 </form>
                             </div>
                         </div>
@@ -98,11 +97,10 @@
                             <div class="pricing-cta">
                                 <!-- Form untuk melakukan pembayaran -->
                                 <form action="{{ route('form.bayar') }}" method="GET">
-                                    <input type="hidden" name="paket" value="Standar">
-                                    <!-- Input harga format mata uang (readonly) -->
-                                    
-                                    <!-- Input tersembunyi untuk mengirimkan harga murni -->
-                                    <input type="hidden" name="harga"  value="500000">
+                                    @php
+                                        $data = encrypt(json_encode(['paket' => 'Standar', 'harga' => 500000]));
+                                    @endphp
+                                    <input type="hidden" name="data" value="{{ $data }}">
                                     <button type="submit" class="btn btn-primary-pesan">Pesan <i class="fas fa-shopping-cart"></i></button>
                                 </form>
                             </div>

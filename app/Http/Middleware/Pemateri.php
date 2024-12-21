@@ -8,19 +8,14 @@ use Symfony\Component\HttpFoundation\Response;
 
 class Pemateri
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
     public function handle(Request $request, Closure $next): Response
-    {  
-            $permision = $request->user()->rul;
-        if($permision == 'PEMATERI') {
+    {
+        // Pastikan pengguna memiliki peran PEMATERI
+        if (auth()->check() && auth()->user()->rul === 'PEMATERI') {
             return $next($request);
-        } else {
-            abort(500);
         }
-        
+
+        // Jika bukan PEMATERI, arahkan ke halaman home dengan pesan error
+        return redirect()->route('home')->with('error', 'Akses hanya untuk Pemateri.');
     }
 }

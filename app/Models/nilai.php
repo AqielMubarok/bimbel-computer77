@@ -15,11 +15,10 @@ class nilai extends Model
     protected $fillable = [
         'user_id',   // ID pengguna yang berelasi
         'name',      // Nama peserta
-        'kehadiran', // Status kehadiran
-        'kompetensi',// Kompetensi yang dinilai
-        'skill', 
-        'status',    
-        'file_nilai', // Pastikan ini ada
+        'nilai_tugas', // Nilai Tugas
+        'nilai_ujian',// Nilai Ujian
+        'predikat', 
+        'kompetensi_unggulan',    
         'updated_at', 
         'created_at'
     ];

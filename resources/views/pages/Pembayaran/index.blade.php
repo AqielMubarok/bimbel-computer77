@@ -1,5 +1,10 @@
 @extends('layouts.app')
 
+@php
+    use Illuminate\Support\Facades\Crypt;
+@endphp
+
+
 @section('title', 'Users')
 
 @push('style')
@@ -112,11 +117,11 @@
                                                                     <i class="fas fa-download"></i> Download
                                                                 </a>
                                                                 
-                                                         <a href="{{route('pembayaran.edit', $pembayaran->id)}}"
-                                                            class="btn btn-sm btn-info btn-icon">
-                                                            <i class="fas fa-edit"></i>
-                                                            Edit
-                                                        </a>
+                                                            <a href="{{ route('pembayaran.edit', Crypt::encrypt($pembayaran->id)) }}"
+                                                                class="btn btn-sm btn-info btn-icon">
+                                                                <i class="fas fa-edit"></i> Edit
+                                                            </a>
+
 
                                                         <form onclick="return confirm('are you sure ? ')"  class="d-inline" action=" {{ route('pembayaran.destroy', $pembayaran->id) }}" method="POST"
                                                         onsubmit="return confirm('Are you sure?')" class="d-inline"   class="ml-2">

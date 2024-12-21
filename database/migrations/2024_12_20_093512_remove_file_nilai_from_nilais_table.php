@@ -4,28 +4,29 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class RemoveFileNilaiFromNilaisTable extends Migration
 {
     /**
      * Run the migrations.
+     *
+     * @return void
      */
     public function up()
     {
         Schema::table('nilais', function (Blueprint $table) {
-            // Gunakan method ->columnExists() untuk mengecek terlebih dahulu
-            if (!Schema::hasColumn('nilais', 'status')) {
-                $table->string('status')->nullable(); // Atau sesuaikan dengan kebutuhan
-            }
+            $table->dropColumn('file_nilai');
         });
     }
 
     /**
      * Reverse the migrations.
+     *
+     * @return void
      */
-    public function down(): void
+    public function down()
     {
         Schema::table('nilais', function (Blueprint $table) {
-            $table->dropColumn('status');
+            $table->string('file_nilai')->nullable(); // Mengembalikan kolom jika di-rollback
         });
     }
-};
+}

@@ -14,7 +14,7 @@
             <div class="section-header">
                 <h1>Profile</h1>
                 <div class="section-header-breadcrumb">
-                    <div class="breadcrumb-item active"><a href="{{ route('home') }}">Dashboard</a></div>
+                    <div class="breadcrumb-item active"><a href="{{ route('dashboard') }}">Dashboard</a></div>
                     <div class="breadcrumb-item">Profile</div>
                 </div>
             </div>
@@ -61,11 +61,14 @@
                                         </div>
 
                                         <!-- Phone Field (Readonly) -->
+                                        @if(auth()->user()->rul == 'PESERTA' || auth()->user()->rul == 'PEMATERI')    
                                         <div class="form-group col-md-6 col-12">
                                             <label>Nomor Handphone</label>
                                             <input type="number" name="phone" class="form-control" value="{{ auth()->user()->phone }}" readonly>
                                         </div>
+                                        @endif
 
+                                        @if(auth()->user()->rul == 'PESERTA' || auth()->user()->rul == 'PEMATERI')
                                         <div class="form-group col-md-6 col-12">
                                             <label>
                                                 @if(auth()->user()->rul == 'PESERTA')
@@ -79,6 +82,7 @@
                                                 value="{{ auth()->user()->rul == 'PESERTA' ? auth()->user()->jenis_paket : auth()->user()->divisi }}" 
                                                 readonly>
                                         </div>
+                                        @endif
 
                                         <!-- Email Field (Readonly) -->
                                         <div class="form-group col-md-6 col-12">

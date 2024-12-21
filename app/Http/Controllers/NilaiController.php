@@ -11,127 +11,131 @@ use Illuminate\Support\Facades\Storage;
 use App\Imports\NilaiImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Auth;
-//auth
-
+use Barryvdh\DomPDF\Facade\PDF;
+use Illuminate\Support\Facades\Crypt;
 
 class NilaiController extends Controller
 {
-    //index
     public function index(Request $request)
     {
-        // Mengambil data pengguna dan nilai terkait
-        $users = User::with('nilai') // Mengambil relasi nilai
-        ->where('rul', 'PESERTA') // Hanya user dengan rul 'PESERTA'
-        ->paginate(10);
-        // Mengirim data ke view
+        // Mengambil data user yang belum memiliki nilai
+        $users = User::doesntHave('nilai') // Memastikan pengguna belum memiliki nilai
+        ->where('rul', 'PESERTA') // Hanya peserta
+        ->when($request->input('name'), function ($query, $name) {
+            return $query->where('name', 'like', '%' . $name . '%'); // Pencarian berdasarkan nama
+        })
+        ->paginate(10); // Pagination untuk hasil
+
         return view('pages.nilai.index', compact('users'));
     }
 
-    public function create($id)
+    // Menampilkan form untuk membuat nilai
+    public function create($encryptedId)
     {
+        // Dekripsi ID yang terenkripsi
+        $id = Crypt::decrypt($encryptedId);
+
         $user = User::findOrFail($id);
         return view('pages.nilai.create', compact('user'));
     }
 
+    // Menyimpan data nilai
+    public function store(Request $request)
+    {
+        $validatedData = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'nilai_tugas' => 'required',
+            'nilai_ujian' => 'required',
+            'predikat' => 'required',
+            'kompetensi_unggulan' => 'required',
+        ]);
+
+        // Ambil nama user
+        $user = User::findOrFail($request->user_id);
+
+        // Tambahkan nama ke validated data
+        $validatedData['name'] = $user->name;
+
+        // Buat record nilai
+        $nilai = new Nilai();
+        $nilai->user_id = $request->user_id;
+        $nilai->name = $user->name; // Tambahkan nama
+        $nilai->nilai_tugas = $validatedData['nilai_tugas'];
+        $nilai->nilai_ujian = $validatedData['nilai_ujian'];
+        $nilai->predikat = $validatedData['predikat'];
+        $nilai->kompetensi_unggulan = $validatedData['kompetensi_unggulan'];
+        $nilai->save();
+        return redirect()->route('nilai.index')->with('success', 'Data berhasil disimpan.');
+    }
+
+    public function lihatnilai(Request $request)
+    {
+        // Jika admin atau pemateri, tampilkan semua data nilai yang sudah ada
+        if (auth()->user()->rul == 'ADMIN' || auth()->user()->rul == 'PEMATERI') {
+            $nilais = DB::table('nilais')
+                ->join('users', 'nilais.user_id', '=', 'users.id') // Menghubungkan tabel nilais dan users
+                ->select('nilais.*', 'users.name') // Pilih kolom yang diperlukan
+                ->when($request->input('name'), function ($query, $name) {
+                    return $query->where('users.name', 'like', '%' . $name . '%'); // Pencarian berdasarkan nama
+                })
+                ->orderBy('nilais.id', 'desc')
+                ->paginate(10);
+        } else {
+            // Untuk user biasa, hanya tampilkan data nilainya sendiri
+            $nilais = DB::table('nilais')
+                ->join('users', 'nilais.user_id', '=', 'users.id') // Menghubungkan tabel nilais dan users
+                ->select('nilais.*', 'users.name') // Pilih kolom yang diperlukan
+                ->where('nilais.user_id', auth()->id())
+                ->when($request->input('name'), function ($query, $name) {
+                    return $query->where('users.name', 'like', '%' . $name . '%'); // Pencarian berdasarkan nama
+                })
+                ->orderBy('nilais.id', 'desc')
+                ->paginate(10);
+        }
+
+        return view('pages.nilai.indexnilai', compact('nilais'));
+    }
+
     public function edit($id)
     {
-    $nilai = Nilai::findOrFail($id);
-    $user = $nilai->user; // Asumsikan relasi Nilai ke User sudah dibuat
-    return view('pages.nilai.create', compact('nilai', 'user')); // Gunakan view yang sama dengan create
+        $nilai = Nilai::findOrFail($id);
+        $user = $nilai->user; // Asumsikan relasi Nilai ke User sudah dibuat
+        return view('pages.nilai.create', compact('nilai', 'user')); // Gunakan view yang sama dengan create
     }
 
     public function update(Request $request, $id)
     {
         $validatedData = $request->validate([
-            'kehadiran' => 'required',
-            'kompetensi' => 'required',
-            'skill' => 'required',
-            'status' => 'required',
+            'nilai_tugas' => 'required',
+            'nilai_ujian' => 'required',
+            'predikat' => 'required',
+            'kompetensi_unggulan' => 'required',
         ]);
     
         $nilai = Nilai::findOrFail($id);
-    
-        // Jika ada file baru di-upload
-        if ($request->hasFile('file_nilai')) {
-            // Hapus file lama jika ada
-            if ($nilai->file_nilai) {
-                Storage::delete('public/' . $nilai->file_nilai);
-            }
-            // Simpan file baru
-        $filePath = $request->file('file_nilai')->store('public/nilai');
-        $validatedData['file_nilai'] = str_replace('public/', '', $filePath);
-    }
+
         $nilai->update($validatedData);
         return redirect()->route('nilai.index')->with('success', 'Data nilai berhasil diperbarui.');
     }
-    
-    
 
-    public function store(Request $request)
-{
-    $validatedData = $request->validate([
-        'user_id' => 'required|exists:users,id',
-        'kehadiran' => 'required',
-        'kompetensi' => 'required',
-        'skill' => 'required',
-        'status' => 'required',
-        'file_nilai' => 'nullable|file|mimes:pdf,docx,doc|max:2048', // Validasi file
-    ]);
+    // Mengunduh sertifikat dalam format PDF
+    public function downloadCertificate($id)
+    {
+        $nilai = Nilai::findOrFail($id);
 
-    // Ambil nama user
-    $user = User::findOrFail($request->user_id);
-    
-    // Tambahkan nama ke validated data
-    $validatedData['name'] = $user->name;
-    
-    // Perbaiki logika upload file
-    if ($request->hasFile('file_nilai')) {
-        // Simpan file dengan nama unik
-        $filePath = $request->file('file_nilai')->store('public/nilai');
-        
-        // Tambahkan path file ke validated data
-        $validatedData['file_nilai'] = str_replace('public/', '', $filePath);
+        // Generate PDF sertifikat
+        $pdf = PDF::loadView('pdf.certificate', ['nilai' => $nilai]);
+
+        // Mengirim PDF sebagai download
+        return $pdf->download('sertifikat_nilai_' . $nilai->user->name . '.pdf');
     }
 
-    // Buat record nilai
-    $nilai = new Nilai();
-    $nilai->user_id = $request->user_id;
-    $nilai->name = $user->name; // Tambahkan nama
-    $nilai->kehadiran = $validatedData['kehadiran'];
-    $nilai->kompetensi = $validatedData['kompetensi'];
-    $nilai->skill = $validatedData['skill'];
-    $nilai->status = $validatedData['status'];
-    // Tambahkan file_nilai jika ada
-    if (isset($validatedData['file_nilai'])) {
-        $nilai->file_nilai = $validatedData['file_nilai'];
-    }
-    
-    $nilai->save();
-    return redirect()->route('nilai.index')->with('success', 'Data berhasil disimpan.');
-}
+    // Menghapus nilai
+    public function destroy($id)
+    {
+        $nilai = Nilai::findOrFail($id);
+        $nilai->delete();
 
-public function download($id)
-{
-    $nilai = Nilai::findOrFail($id); // Pastikan model Nilai diimport di controller
-    $filePath = storage_path('app/public/' . $nilai->file_nilai);
-
-    if (file_exists($filePath)) {
-        return response()->download($filePath);
-    }
-
-    return redirect()->back()->with('error', 'File tidak ditemukan.');
-}
-
-public function destroy($id)
-{
-    $nilai = Nilai::findOrFail($id);
-
-    try {
-        $nilai->delete(); // Hapus data
         return redirect()->back()->with('success', 'Data nilai berhasil dihapus.');
-    } catch (\Exception $e) {
-        return redirect()->back()->with('error', 'Terjadi kesalahan saat menghapus data.');
     }
-}
-    
 }

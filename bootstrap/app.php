@@ -8,6 +8,7 @@ use App\Http\Middleware\Admin;
 use App\Http\Middleware\CheckPaymentStatus;
 use App\Http\Middleware\Pemateri;
 use App\Http\Middleware\Peserta;
+use App\Http\Middleware\CheckAccess;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -18,9 +19,12 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         //auth admin pemateri peserta class 
         $middleware->alias([
-            'Admin'=> Admin::class,
-            'Pemateri'=> Pemateri::class,
-            'Peserta'=> Peserta::class
+            'admin'=> Admin::class, 
+            'pemateri'=> Pemateri::class,
+            'peserta'=> Peserta::class,
+            'checkAccess' => CheckAccess::class,
+            'checkPaymentStatus' => CheckPaymentStatus::class,
+
         ]);
  
         

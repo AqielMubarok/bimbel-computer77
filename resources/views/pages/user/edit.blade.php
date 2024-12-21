@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@php
+    use Illuminate\Support\Facades\Crypt;
+@endphp
+
 @section('title', 'New User')
 
 @push('style')
@@ -21,7 +25,7 @@
             <div class="section-body">
 
                 <div class="card">
-                    <form action="{{ route('user.update', $user->id) }}" method="POST">
+                    <form action="{{ route('user.update', ['user' => Crypt::encrypt($user->id)]) }}" method="POST">
                         @csrf
                         @method('PUT')
                         <div class="card-header">

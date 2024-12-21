@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use Illuminate\Http\Request;
 use App\Models\KumpulTugas;
 use Illuminate\Support\Facades\Auth;
@@ -9,12 +8,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log; 
 use Illuminate\Support\Facades\Storage;
 
-
 class KumpulTugasController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index( Request $request)
     {
         $name = $request->input('name');
@@ -30,17 +25,11 @@ class KumpulTugasController extends Controller
         return view('pages.Kumpul.index',compact('kumpul_tugas'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         return view('pages.Kumpul.upload' );
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         // Validasi input
@@ -73,7 +62,6 @@ class KumpulTugasController extends Controller
         // Ambil data 'jenis_paket' dari pembayaran
         $jenisPaket = $pembayaran->jenis_paket; // Hasilnya: "Premium" atau "Standar"
 
-        
         // Simpan data ke tabel kumpul_tugas
         KumpulTugas::create([
             'name' => $user->name, // Nama user
@@ -90,7 +78,6 @@ class KumpulTugasController extends Controller
             // Simpan file ke dalam folder 'public/tugas'
             $request->file('file')->storeAs('public/tugas', $filename);
         
-
         // Redirect dengan pesan sukses
         return redirect()->back()->with('success', 'Tugas Anda  Berhasil Dikumpulkan!');
     }

@@ -64,16 +64,6 @@
                 @endif
             @endif
 
-            {{-- Menu untuk ADMIN dan PEMATERI - Absensi --}}
-            @if(auth()->user()->rul == 'ADMIN' || auth()->user()->rul == 'PEMATERI')
-            <li class="nav-item dropdown">
-               
-                <ul class="dropdown-menu">
-                   
-                </ul>
-            </li>
-            @endif
-
             {{-- Menu untuk Tugas --}}
             <li class="nav-item dropdown">
                 <a href="#" class="nav-link has-dropdown">
@@ -113,7 +103,7 @@
     @endif
     @if(auth()->user()->rul == 'ADMIN' || auth()->user()->rul == 'PEMATERI')
     <a class="nav-link" href="{{ route('kumpul.index') }}">Lihat Tugas Peserta</a>
-@endif
+    @endif
     
 </li>
                 </ul>
@@ -138,11 +128,6 @@
                         <a class="nav-link" href="{{route('lihatnilai.index')}}">Lihat Nilai</a>
                     </li>
                     @endif
-                    @if(auth()->user()->rul == 'ADMIN')
-                    <li>
-                        <a class="nav-link" href="">Report Nilai</a>
-                    </li>
-                    @endif
                 </ul>
             </li>
 
@@ -153,9 +138,6 @@
                     <i class="fas fa-folder"></i><span>Laporan</span>
                 </a>
                 <ul class="dropdown-menu">
-                    <li>
-                        <a class="nav-link" href="">Pendaftaran Peserta</a>
-                    </li>
                     <li>
                         <a class="nav-link" href="{{ route('pembayaran.index') }}">Pembayaran Bimbel</a>
                     </li>
@@ -172,7 +154,7 @@
                 <ul class="dropdown-menu">
                     @if(auth()->user()->rul == 'PESERTA' && $pembayaran && $pembayaran->status == 'Approved')
                     <li>
-                        <a class="nav-link" href="{{ route('history.pembayaran') }}">Pembayaran</a>
+                        <a class="nav-link" href="{{ route('pembayaran.history') }}">Pembayaran</a>
                     </li>
                     @endif
                 </ul>

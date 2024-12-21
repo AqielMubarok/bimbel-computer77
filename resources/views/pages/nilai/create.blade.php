@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@php
+    use Illuminate\Support\Facades\Crypt;
+@endphp
+
 @section('title', 'Edit Nilai Peserta Bimbel')
 
 @push('style')
@@ -11,11 +15,6 @@
         <section class="section">
             <div class="section-header">
                 <h1>Edit Nilai Peserta Bimbel</h1>
-                <div class="section-header-breadcrumb">
-                    <div class="breadcrumb-item active"><a href="#">Dashboard</a></div>
-                    <div class="breadcrumb-item"><a href="#">Nilai</a></div>
-                    <div class="breadcrumb-item">Edit Nilai</div>
-                </div>
             </div>
 
             <div class="section-body">
@@ -46,68 +45,51 @@
 
                             <!-- Kehadiran -->
                             <div class="form-group">
-                                <label for="kehadiran">Kehadiran</label>
+                                <label for="nilai_tugas">Nilai Tugas</label>
                                 <input 
                                     type="text" 
-                                    name="kehadiran" 
-                                    id="kehadiran" 
-                                    placeholder="Kehadiran"
-                                    class="form-control @error('kehadiran') is-invalid @enderror"
-                                    value="{{ old('kehadiran', isset($nilai) ? $nilai->kehadiran : '') }}">
+                                    name="nilai_tugas" 
+                                    id="nilai_tugas" 
+                                    placeholder="Nilai Tugas"
+                                    class="form-control @error('nilai_tugas') is-invalid @enderror"
+                                    value="{{ old('nilai_tugas', isset($nilai) ? $nilai->nilai_tugas : '') }}">
                             </div>
 
                             <!-- Kompetensi -->
                             <div class="form-group">
-                                <label for="kompetensi">Kompetensi</label>
+                                <label for="nilai_ujian">Nilai Ujian</label>
                                 <input 
                                     type="text" 
-                                    name="kompetensi" 
-                                    id="kompetensi" 
-                                    placeholder="Kompetensi"
-                                    class="form-control @error('kompetensi') is-invalid @enderror"
-                                    value="{{ old('kompetensi', isset($nilai) ? $nilai->kompetensi : '') }}">
+                                    name="nilai_ujian" 
+                                    id="nilai_ujian" 
+                                    placeholder="Nilai Ujian"
+                                    class="form-control @error('nilai_ujian') is-invalid @enderror"
+                                    value="{{ old('nilai_ujian', isset($nilai) ? $nilai->nilai_ujian : '') }}">
                             </div>
 
                             <!-- Skill -->
                             <div class="form-group">
-                                <label for="skill">Skill</label>
+                                <label for="predikat">Predikat</label>
                                 <input 
                                     type="text" 
-                                    name="skill" 
-                                    id="skill" 
-                                    placeholder="Skill"
-                                    class="form-control @error('skill') is-invalid @enderror"
-                                    value="{{ old('skill', isset($nilai) ? $nilai->skill : '') }}">
+                                    name="predikat" 
+                                    id="predikat" 
+                                    placeholder="Predikat"
+                                    class="form-control @error('predikat') is-invalid @enderror"
+                                    value="{{ old('predikat', isset($nilai) ? $nilai->predikat : '') }}">
                             </div>
 
                             <!-- Status -->
                             <div class="form-group">
-                                <label for="status">Status</label>
+                                <label for="kompetensi_unggulan">Kompetensi Unggulan</label>
                                 <input 
                                     type="text" 
-                                    name="status" 
-                                    id="status" 
-                                    placeholder="Status"
-                                    class="form-control @error('status') is-invalid @enderror"
-                                    value="{{ old('status', isset($nilai) ? $nilai->status : '') }}">
+                                    name="kompetensi_unggulan" 
+                                    id="kompetensi_unggulan" 
+                                    placeholder="Kompetensi Unggulan"
+                                    class="form-control @error('kompetensi_unggulan') is-invalid @enderror"
+                                    value="{{ old('kompetensi_unggulan', isset($nilai) ? $nilai->kompetensi_unggulan : '') }}">
                             </div>
-
-                            <!-- Upload -->
-                            <div class="form-group">
-                                <label for="file_nilai">Upload File Nilai</label>
-                                <input 
-                                    type="file" 
-                                    name="file_nilai" 
-                                    id="file_nilai" 
-                                    class="form-control @error('file_nilai') is-invalid @enderror">
-
-                                @error('file_nilai')
-                                    <div class="invalid-feedback">
-                                        {{ $message }}
-                                    </div>
-                                @enderror
-                            </div>
-
                         </div>
                         <div class="card-footer text-right">
                             <button type="submit" class="btn btn-primary">{{ isset($nilai) ? 'Update' : 'Submit' }}</button>
@@ -120,5 +102,19 @@
 @endsection
 
 @push('scripts')
-    <!-- JS Libraries -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('form');
+        const fileInput = document.getElementById('file_nilai');
+
+        form.addEventListener('submit', function (e) {
+            // Cek apakah file belum diupload
+            if (!fileInput.files.length) {
+                e.preventDefault(); // Menghentikan pengiriman form
+                alert('Silakan upload file sebelum mengirimkan formulir!');
+            }
+        });
+    });
+</script>
 @endpush
+

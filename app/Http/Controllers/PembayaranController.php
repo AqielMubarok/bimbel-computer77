@@ -8,43 +8,45 @@ use App\Models\Pembayaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-//excel
-use Maatwebsite\Excel\Facades\Excel;
-//log
 use Illuminate\Support\Facades\Log;
-
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Crypt;
+use Barryvdh\DomPDF\Facade\PDF;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PembayaranController extends Controller
-
-
 {
-
     public function index(Request $request)
-
     {
         $pembayarans = DB::table('pembayarans')
-        ->when($request->input('name'), function ($query, $name) {
-            return $query->where('name', 'like', '%' . $name . '%');
-        })
-        //->select('id', 'name', 'email', 'phone', DB::raw('DATE_FORMAT(created_at, "%d %M %Y") as created_at'))
-        ->orderBy('id', 'desc')
-        ->paginate(10);
+            ->when($request->input('name'), function ($query, $name) {
+                return $query->where('name', 'like', '%' . $name . '%');
+            })
+            ->orderBy('id', 'desc')
+            ->paginate(10);
 
-
-        
-        return view('pages.Pembayaran.index' , compact('pembayarans'));
+        return view('pages.Pembayaran.index', compact('pembayarans'));
     }
 
-
-
-
-    public function formBayar()
+    public function formBayar(Request $request)
     {
-        return view('pages.Pembayaran.formbayar');
+        try {
+            $decryptedData = json_decode(decrypt($request->input('data')), true);
+
+            if (!isset($decryptedData['paket'], $decryptedData['harga'])) {
+                return redirect()->route('pages.Pembayaran.paket')->with('error', 'Data tidak valid.');
+            }
+
+            return view('pages.Pembayaran.formbayar', [
+                'paket' => $decryptedData['paket'],
+                'harga' => $decryptedData['harga'],
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->route('pages.Pembayaran.paket')->with('error', 'Data tidak valid.');
+        }
     }
 
-    public function StorePembayaranRequest(Request $request)
+    public function storePembayaranRequest(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -52,140 +54,87 @@ class PembayaranController extends Controller
             'email' => 'required|email|max:255',
             'jenis_paket' => 'required|string|max:255',
             'harga' => 'required|numeric',
-            'struk' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048', // Validasi file bukti pembayaran
+            'struk' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
 
-        
-        // Menyimpan file bukti pembayaran jika ada
-        $struk = null;
-        $struk = $request->file('struk')->getClientOriginalName();
         $struk = $request->file('struk')->store('public/STRUK');
-        
-        
-     
-        
 
         Pembayaran::create([
-            'user_id' => auth()->id(), // User yang melakukan pembayaran
+            'user_id' => auth()->id(),
             'name' => $request->name,
             'no_telp' => $request->no_telp,
             'email' => $request->email,
-            'jenis_paket' => $validated['jenis_paket'], // Isi jenis_paket
-            'harga' => $validated['harga'], // Harga paket
-            'status' => 'pending', // Status default adalah pending
+            'jenis_paket' => $validated['jenis_paket'],
+            'harga' => $validated['harga'],
+            'status' => 'pending',
             'tanggal_pembayaran' => now(),
-            'struk' => $struk ? str_replace('public/', '', $struk) : null,
-            'user_id' => Auth::id(), // Menyimpan path file jika ada
-            
+            'struk' => basename($struk),
         ]);
 
-        return redirect()->route('form.bayar')->with('success', 'Data anda berhasil disimpan. Silakan Menunggu untuk disetujui oleh Admin');
+        return redirect()->back()->with('success', 'Bukti telah terkirim. Silakan menunggu 1x24 Jam');
     }
 
-    public function showForm(Request $request)
+    public function edit($id)
     {
-        // Ambil data dari query string
-        $paket = $request->query('paket');
-        $harga = $request->query('harga');
-
-        // Kirim data ke view
-        return view('pages.Pembayaran.formbayar', compact('paket', 'harga'));
+        try {
+            $id = Crypt::decrypt($id);
+            $pembayaran = Pembayaran::findOrFail($id);
+            return view('pages.Pembayaran.edit', compact('pembayaran'));
+        } catch (\Exception $e) {
+            return redirect()->route('pembayaran.index')->with('error', 'Data tidak valid.');
+        }
     }
 
-    public function edit(Pembayaran $pembayaran)
-{
-    return view('pages.Pembayaran.edit', compact('pembayaran'));
-}
+    public function update(Request $request, $id)
+    {
+        $id = Crypt::decrypt($id);
 
-public function update(Request $request, $id)
-{
-    // Validasi input
-    $request->validate([
-        'status' => 'required|in:Approved,Rejected', // Hanya menerima status Approved atau Rejected
-    ]);
+        $request->validate([
+            'status' => 'required|in:Approved,Rejected',
+        ]);
 
-    // Ambil data pembayaran berdasarkan ID
-    $pembayaran = Pembayaran::findOrFail($id);
+        $pembayaran = Pembayaran::findOrFail($id);
+        $user = $pembayaran->user;
 
-    // Ambil user terkait pembayaran
-    $user = $pembayaran->user;
+        if ($request->status === 'Approved') {
+            $user->update(['jenis_paket' => $pembayaran->jenis_paket]);
+        } elseif ($request->status === 'Rejected') {
+            $user->update(['jenis_paket' => null]);
+        }
 
-    // Cek apakah status yang dipilih adalah "Approved"
-    if ($request->status == 'Approved') {
-        // Tambahkan jenis_paket ke tabel users
-        $user->jenis_paket = $pembayaran->jenis_paket;
-        $user->save(); // Simpan perubahan pada tabel users
+        $pembayaran->update(['status' => $request->status]);
+
+        return redirect()->route('pembayaran.index')->with('success', 'Data berhasil diperbarui.');
     }
-
-    // Jika status adalah "Rejected"
-    if ($request->status == 'Rejected') {
-        // Kosongkan jenis_paket pada tabel users
-        $user->jenis_paket = null;
-        $user->save(); // Simpan perubahan pada tabel users
-    }
-
-    /// Update status pembayaran di tabel pembayarans
-    $pembayaran->status = $request->status;
-    $pembayaran->save();
-
-    $pembayaran->update([
-       
-        'status' => $request->status, // Update status pembayaran
-    ]);
-
-    return redirect()->route('pembayaran.index', ['id' => $pembayaran->id])->with('success', 'Data berhasil diperbarui.');
-}
-
-public function download($id)
-{
-  
-    // Cari data pembayaran berdasarkan ID
-    $pembayaran = Pembayaran::find($id);
-    
-    // Jika data tidak ditemukan
-    if (!$pembayaran) {
-        return redirect()->route('pembayaran.index')->with('error', 'Struk tidak ditemukan.');
-    }
-
-    // Periksa apakah kolom struk memiliki nilai
-    if (!$pembayaran->struk) {
-        return redirect()->route('pembayaran.index')->with('error', 'Struk belum diunggah.');
-    }
-
-    // Dapatkan path file dari storage
-    $filePath = storage_path('app/public/STRUK/' . basename($pembayaran->struk));
-
-
-    // dd($pembayaran->struk);
-
-    // Periksa apakah file benar-benar ada
-    if (!file_exists($filePath)) {
-        Log::error("File tidak ditemukan: {$filePath}");
-        return redirect()->route('pembayaran.index')->with('error', 'File tidak ditemukan di server.');
-    }
-
-    // Download file
-    return response()->download($filePath, $pembayaran->file);
-
-    
-}
-
-
-
 
     public function destroy(Pembayaran $pembayaran)
     {
-        $pembayaran->delete();
-       
-       return redirect()->route('pembayaran.index')->with('success', 'Data anda berhasil di hapus');
+        try {
+            $user = $pembayaran->user;
+
+            if ($user) {
+                $user->update(['jenis_paket' => null]);
+            }
+
+            $pembayaran->delete();
+
+            return redirect()->route('pembayaran.index')->with('success', 'Data berhasil dihapus');
+        } catch (\Exception $e) {
+            return redirect()->route('pembayaran.index')->with('error', 'Gagal menghapus data');
+        }
     }
 
     public function export()
-{
-    return Excel::download(new PembayaranExport, 'Pembayaran.xlsx');
+    {
+        return Excel::download(new PembayaranExport, 'Pembayaran.xlsx');
+    }
+
+    public function printStruk($id)
+    {
+        $pembayaran = Pembayaran::findOrFail($id);
+
+        $pdf = PDF::loadView('pdf.struk', ['pembayaran' => $pembayaran]);
+
+        return $pdf->download('struk_pembayaran_' . $pembayaran->id . '.pdf');
+    }
 }
-
-
- 
-}
-

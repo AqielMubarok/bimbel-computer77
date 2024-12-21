@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@php
+    use Illuminate\Support\Facades\Crypt;
+@endphp
+
 @section('title', 'Users')
 
 @push('style')
@@ -103,12 +107,11 @@
                                             <td>
                                                 
                                             <div class="d-flex justify-content-center">
-                                                         <a href="{{ route('user.edit', $user->id) }}"
-                                                            class="btn btn-sm btn-info btn-icon">
-                                                            <i class="fas fa-edit"></i>
-                                                            Edit
-                                                        </a>
-
+                                            <a href="{{ route('user.edit.encrypted', ['encryptedId' => Crypt::encrypt($user->id)]) }}"
+                                                class="btn btn-sm btn-info btn-icon">
+                                                <i class="fas fa-edit"></i>
+                                                Edit
+                                            </a>
                                                         <form onclick="return confirm('are you sure ? ')"  class="d-inline" action=" {{ route('user.destroy', $user->id) }}" method="POST"
                                                             class="ml-2">
                                                             <input type="hidden" name="_method" value="DELETE" />

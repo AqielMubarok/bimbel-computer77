@@ -30,6 +30,9 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Menonaktifkan rute default Fortify (termasuk login)
+        Fortify::ignoreRoutes();
+
         Fortify::createUsersUsing(CreateNewUser::class);
         Fortify::updateUserProfileInformationUsing(UpdateUserProfileInformation::class);
         Fortify::updateUserPasswordsUsing(UpdateUserPassword::class);
@@ -84,19 +87,5 @@ class FortifyServiceProvider extends ServiceProvider
             return view('pages.Auth.auth-verify-email');
         });
 
-
     }
 }
-
-    Fortify::redirects('login', function () {
-        $user = Auth::user();
-    
-        if ($user->rul === 'ADMIN' || $user->rul === 'PEMATERI') {
-            return '/dashboard'; // Dashboard untuk admin dan pemateri
-        }
-    
-        return '/home'; // Default untuk role lain
-    });
-
-
-

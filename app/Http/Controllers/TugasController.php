@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Http\Requests\StoreTugasRequest;
 use App\Http\Requests\UpdateTugas;
 use Illuminate\Support\Facades\DB;
@@ -49,30 +48,10 @@ class TugasController extends Controller
                 'file' => $filename, // Simpan nama file (bukan path lengkap)
             ]);
 
-
-
             // Redirect ke halaman index dengan pesan sukses
             return redirect()->route('tugas.index')->with('success', 'Tugas telah ditambahkan');
         }
-
         return redirect()->back()->with('error', 'File tidak ditemukan');
-    }
-
-    public function destroy($learning)
-    {
-        // Cari tugas berdasarkan ID
-        $tugas = DB::table('tugas')->where('learning', $learning)->first();
-
-        // Jika tugas tidak ditemukan, redirect dengan error
-        if (!$tugas) {
-            return redirect()->route('tugas.index')->with('error', 'Tugas tidak ditemukan.');
-        }
-
-        // Hapus tugas
-        DB::table('tugas')->where('learning', $learning)->delete();
-
-        // Redirect ke halaman index dengan pesan sukses
-        return redirect()->route('tugas.index')->with('success', 'Tugas berhasil dihapus.');
     }
 
     public function download($learning)
@@ -96,10 +75,24 @@ class TugasController extends Controller
         // Download file
         return response()->download($filePath, $tugas->file);
     }
-    
-    
 
+    public function destroy($learning)
+    {
+        // Cari tugas berdasarkan ID
+        $tugas = DB::table('tugas')->where('learning', $learning)->first();
 
+        // Jika tugas tidak ditemukan, redirect dengan error
+        if (!$tugas) {
+            return redirect()->route('tugas.index')->with('error', 'Tugas tidak ditemukan.');
+        }
+
+        // Hapus tugas
+        DB::table('tugas')->where('learning', $learning)->delete();
+
+        // Redirect ke halaman index dengan pesan sukses
+        return redirect()->route('tugas.index')->with('success', 'Tugas berhasil dihapus.');
+    }
+    
     public function edit(Tugas $learning )
     {
         // Mencari tugas berdasarkan learning
@@ -115,7 +108,7 @@ class TugasController extends Controller
     }
 
     public function update(UpdateTugas $request, Tugas $learning)
-{
+    {
     // Validasi input
     $request->validate([
         'learning' => 'required|string|max:255',
@@ -151,8 +144,5 @@ class TugasController extends Controller
 
     // Redirect ke halaman index dengan pesan sukses
     return redirect()->route('tugas.index')->with('success', 'Tugas berhasil diupdate.');
-  
-}
-
-
+    }
 }

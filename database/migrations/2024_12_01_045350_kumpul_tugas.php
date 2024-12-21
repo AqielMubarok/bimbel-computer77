@@ -1,32 +1,28 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
-return new class extends Migration
+class KumpulTugas extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
-        
-        Schema::create('kumpul_tugas', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-            $table->string('name');
-            $table->string('jenis_paket');
-            $table->string('kelas');
-            $table->string('file', 255)->nullable();
-        });
+        if (!Schema::hasTable('kumpul_tugas')) {
+            Schema::create('kumpul_tugas', function (Blueprint $table) {
+                $table->id();
+                $table->string('name');
+                $table->string('judul_tugas'); 
+                $table->string('jenis_paket');
+                $table->string('kelas');
+                $table->string('file')->nullable();
+                $table->timestamps();
+            });
+        }
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
-        //
+        Schema::dropIfExists('kumpul_tugas');
     }
-};
+}

@@ -56,14 +56,22 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    protected static function booted()
+    {
+        static::creating(function ($user) {
+            $user->phone = '+62' . ltrim($user->phone, '0'); // Tambahkan +62 dan hilangkan angka 0 di awal
+        });
+    }
+
     public function pembayaran()
     {
         return $this->hasOne(Pembayaran::class, 'user_id', 'id'); // Menggunakan user_id di tabel pembayarans
     }
 
     public function nilai()
-{
-    return $this->hasMany(nilai::class, 'user_id', 'id'); // Menghubungkan id di tabel users ke user_id di tabel nilai
-}
+    {
+        return $this->hasMany(nilai::class, 'user_id', 'id'); // Menghubungkan id di tabel users ke user_id di tabel nilai
+    }
     
 }

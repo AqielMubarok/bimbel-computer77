@@ -96,7 +96,7 @@
                                     <button type="submit" class="btn btn-primary btn-icon icon-left">
                                         <i class="fas fa-upload"></i> Upload Tugas
                                     </button>
-                                    <a href="{{ route('kumpul.index') }}" class="btn btn-danger btn-icon icon-left">
+                                    <a href="{{ route('kumpul.create') }}" class="btn btn-danger btn-icon icon-left">
                                         <i class="fas fa-times"></i> Cancel
                                     </a>
                                 </div>

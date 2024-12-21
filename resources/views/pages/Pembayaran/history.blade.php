@@ -36,7 +36,7 @@
                                                 <td>{{ $pembayaran->created_at->format('d M Y H:i') }}</td>
                                                 <td>
                                                     <div class="d-flex">
-                                                    <a href="#" class="btn btn-sm btn-primary mr-2 btn-print" data-id="{{ $pembayaran->id }}">
+                                                    <a href="{{ route('pembayaran.print', $pembayaran->id) }}" class="btn btn-sm btn-primary mr-2">
                                                         <i class="fas fa-print"></i> Print
                                                     </a>
                                                     </div>

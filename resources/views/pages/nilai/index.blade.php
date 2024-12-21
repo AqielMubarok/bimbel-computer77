@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@php
+    use Illuminate\Support\Facades\Crypt;
+@endphp
+
 @section('title', 'Users')
 
 @push('style')
@@ -63,9 +67,9 @@
                                                     <td>{{ $user->name }}</td> <!-- Nama dari tabel users -->
                                                     <!-- Status -->
                                                     <td>
-                                                        <a href="{{ route('nilai.create', $user->id) }}" class="btn btn-sm btn-info btn-icon">
-                                                            <i class="fas fa-edit"></i> Input Nilai
-                                                        </a>
+                                                    <a href="{{ route('nilai.create', ['encryptedId' => Crypt::encrypt($user->id)]) }}" class="btn btn-sm btn-info btn-icon">
+                                                        <i class="fas fa-edit"></i> Input Nilai
+                                                    </a>
                                                     </td>
                                                 </tr>
                                             @empty

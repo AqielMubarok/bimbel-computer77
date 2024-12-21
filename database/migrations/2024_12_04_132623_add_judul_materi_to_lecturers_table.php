@@ -1,28 +1,24 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
-return new class extends Migration
+class AddJudulMateriToLecturersTable extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
-        Schema::table('lecturers', function (Blueprint $table) {
-            $table->string('judul_materi');
-        });
+        if (!Schema::hasColumn('lecturers', 'judul_materi')) {
+            Schema::table('lecturers', function (Blueprint $table) {
+                $table->string('judul_materi');
+            });
+        }
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::table('lecturers', function (Blueprint $table) {
-            //
+            $table->dropColumn('judul_materi');
         });
     }
-};
+}
