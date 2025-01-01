@@ -73,5 +73,13 @@ class User extends Authenticatable
     {
         return $this->hasMany(nilai::class, 'user_id', 'id'); // Menghubungkan id di tabel users ke user_id di tabel nilai
     }
+
+    public function getFormattedPhoneAttribute()
+    {
+        if ($this->phone && str_starts_with($this->phone, '+62')) {
+            return '0' . substr($this->phone, 3); // Ubah +62 menjadi 0
+        }
+        return $this->phone;
+    }
     
 }

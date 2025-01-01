@@ -64,7 +64,7 @@
                                         @if(auth()->user()->rul == 'PESERTA' || auth()->user()->rul == 'PEMATERI')    
                                         <div class="form-group col-md-6 col-12">
                                             <label>Nomor Handphone</label>
-                                            <input type="number" name="phone" class="form-control" value="{{ auth()->user()->phone }}" readonly>
+                                            <input type="text" name="phone" class="form-control" value="{{ auth()->user()->formatted_phone }}" readonly>
                                         </div>
                                         @endif
 
